@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~*~ Le Forum ~*~</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #d6d3ce url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFklEQVQYV2NkYGD4z8DAwMBIEGQgFAAAX9wCAX9zGqYAAAAASUVORK5CYII=") repeat;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 13px;
+    color: #000;
+  }
+  a { color: #0000EE; }
+  a:visited { color: #551A8B; }
+
+  .marquee-wrap {
+    background: #000080;
+    color: #FFFF00;
+    font-weight: bold;
+    padding: 3px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 2px solid #FFD700;
+  }
+  .marquee-inner {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll 14s linear infinite;
+  }
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .page { max-width: 800px; margin: 10px auto; padding: 0 8px; }
+
+  .titre-site {
+    text-align: center;
+    padding: 10px;
+    background: linear-gradient(#a9c9ec, #6a9fd8);
+    border: 3px solid #003366;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  .titre-site h1 {
+    margin: 0;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-size: 30px;
+    color: #FF0000;
+    text-shadow: 2px 2px 0 #FFFF00, -1px -1px 0 #000080;
+  }
+  .titre-site p { margin: 4px 0 0; font-style: italic; color: #003366; }
+
+  .boite {
+    background: #ECE9D8;
+    border: 2px outset #ffffff;
+    box-shadow: 2px 2px 0 #808080;
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+  .boite-titre {
+    background: linear-gradient(#0a246a, #a6caf0);
+    color: #fff;
+    font-weight: bold;
+    padding: 3px 6px;
+    margin: -8px -8px 8px -8px;
+    font-size: 13px;
+  }
+
+  .recherche-zone { display: flex; gap: 6px; margin-bottom: 8px; }
+  .recherche-zone input { flex: 1; }
+
+  table.forum { width: 100%; border-collapse: collapse; background: #fff; }
+  table.forum th { background: #003366; color: #fff; padding: 5px; text-align: left; font-size: 12px; }
+  table.forum td { border-bottom: 1px solid #ccc; padding: 6px; vertical-align: top; }
+  table.forum tr:nth-child(even) td { background: #f0f0f0; }
+  table.forum tr:hover td { background: #ffffcc; }
+
+  .rubrique-nom { font-weight: bold; font-size: 14px; }
+  .rubrique-desc { color: #444; font-size: 11px; }
+
+  button, .btn {
+    background: linear-gradient(#f5f5f5, #d4d0c8);
+    border: 2px outset #fff;
+    padding: 5px 12px;
+    font-family: Verdana, Arial, sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  button:active, .btn:active { border-style: inset; }
+  button:disabled { opacity: 0.5; cursor: default; }
+
+  input[type=text], textarea, select {
+    border: 2px inset #808080;
+    padding: 4px;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .message { border: 1px solid #b0b0b0; background: #fff; margin-bottom: 8px; display: flex; }
+  .message-side {
+    background: #dfe8f5;
+    border-right: 1px solid #b0b0b0;
+    padding: 6px;
+    width: 110px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 11px;
+  }
+  .message-pseudo { font-weight: bold; color: #000080; word-break: break-word; }
+  .message-body { padding: 8px; flex: 1; }
+  .message-date { color: #777; font-size: 10px; margin-bottom: 4px; }
+  .message-texte { white-space: pre-wrap; word-break: break-word; }
+  .message-photo { max-width: 100%; max-height: 300px; border: 2px solid #999; margin-top: 6px; display: block; }
+
+  .fil-ariane { font-size: 11px; margin-bottom: 8px; }
+  .fil-ariane a { text-decoration: none; }
+
+  footer { text-align: center; font-size: 11px; color: #555; padding: 14px 0; }
+
+  .compteur {
+    display: inline-block;
+    background: #000;
+    color: #0f0;
+    font-family: "Courier New", monospace;
+    padding: 2px 6px;
+    letter-spacing: 2px;
+    border: 1px solid #333;
+  }
+
+  .champ-groupe { margin-bottom: 8px; }
+  label { font-weight: bold; display: block; margin-bottom: 2px; font-size: 12px; }
+
+  .apercu-photo { max-width: 150px; max-height: 150px; margin-top: 6px; border: 1px solid #999; display: none; }
+  .aucun-resultat { padding: 10px; text-align: center; color: #666; font-style: italic; }
+  .statut-connexion { font-size: 11px; text-align: center; padding: 4px; }
+  .statut-connexion.ok { color: #1a7a1a; }
+  .statut-connexion.ko { color: #b00; }
+
+  @media (max-width: 480px) {
+    .titre-site h1 { font-size: 22px; }
+    .message { flex-direction: column; }
+    .message-side { width: auto; display: flex; align-items: center; gap: 6px; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="marquee-wrap">
+  <div class="marquee-inner">★彡 BIENVENUE SUR LE FORUM ! Discute librement, sans inscription, en toute simplicité ! N'hésite pas à créer ta propre rubrique ! 彡★</div>
+</div>
+
+<div class="page">
+  <div class="titre-site">
+    <h1>~*~ Le Forum ~*~</h1>
+    <p>Discussion libre, sans compte, comme au bon vieux temps</p>
+  </div>
+
+  <div id="statut-connexion" class="statut-connexion"></div>
+  <div id="app"></div>
+
+  <footer>
+    Visiteur n° <span class="compteur" id="compteur">000000</span><br>
+    leforum.online — Site optimisé pour tous les écrans<br>
+    © 2000-2026 Le Forum — Aucun droit particulièrement réservé
+  </footer>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc,
+  query, where, orderBy, onSnapshot, serverTimestamp, getCountFromServer, limit
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCL9W2oEWIBIngzgoR0ENSt59-sh1-UY5U",
+  authDomain: "site-5e0e2.firebaseapp.com",
+  projectId: "site-5e0e2",
+  storageBucket: "site-5e0e2.firebasestorage.app",
+  messagingSenderId: "468030365439",
+  appId: "1:468030365439:web:f036d9a4dc182005a876ca"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const rubriquesRef = collection(db, "rubriques");
+const messagesRef = collection(db, "messages");
+
+const DEFAUT_RUBRIQUES = [
+  { id: "general",  nom: "Général",         desc: "Le bar du forum, on parle de tout et de rien.", couleur: "#e74c3c" },
+  { id: "musique",   nom: "Musique",         desc: "Vos groupes, sons et découvertes du moment.",   couleur: "#8e44ad" },
+  { id: "cinema",    nom: "Cinéma & Séries", desc: "Films, séries, critiques et recommandations.",  couleur: "#2980b9" },
+  { id: "jeuxvideo", nom: "Jeux vidéo",      desc: "PC, consoles, rétrogaming, tout est permis.",    couleur: "#27ae60" },
+  { id: "humour",    nom: "Humour",          desc: "Blagues, memes, délires en tout genre.",         couleur: "#f39c12" },
+  { id: "photos",    nom: "Photos",          desc: "Partagez vos photos, montages, dessins.",        couleur: "#16a085" },
+];
+
+let etat = { vue: "accueil", rubriqueId: null };
+let rubriques = [];
+let filtreRecherche = "";
+let photoBase64Temp = null;
+let pseudoMemoire = "";
+let desinscrireMessages = null;
+
+function echapper(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(ts) {
+  if (!ts) return "à l'instant";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("fr-FR") + " à " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+}
+
+async function initFirebase() {
+  const statutEl = document.getElementById("statut-connexion");
+  try {
+    await seedRubriquesSiVide();
+    statutEl.textContent = "";
+  } catch (e) {
+    console.error(e);
+    statutEl.textContent = "⚠️ Connexion à la base de données impossible. Vérifie la config Firebase et les règles Firestore.";
+    statutEl.className = "statut-connexion ko";
+  }
+}
+
+async function seedRubriquesSiVide() {
+  const snap = await getDocs(query(rubriquesRef, limit(1)));
+  if (!snap.empty) return;
+  for (const r of DEFAUT_RUBRIQUES) {
+    const ref = doc(db, "rubriques", r.id);
+    const existe = await getDoc(ref);
+    if (!existe.exists()) {
+      await setDoc(ref, { nom: r.nom, desc: r.desc, couleur: r.couleur, createdAt: serverTimestamp() });
+    }
+  }
+}
+
+function ecouterRubriques(callback) {
+  return onSnapshot(query(rubriquesRef, orderBy("createdAt", "desc")), (snap) => {
+    rubriques = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback();
+  }, (err) => {
+    console.error(err);
+  });
+}
+
+async function redessiner() {
+  const app = document.getElementById("app");
+  if (etat.vue === "accueil") {
+    await vueAccueil(app);
+  } else if (etat.vue === "rubrique") {
+    await vueRubrique(app);
+  }
+}
+
+async function vueAccueil(app) {
+  const rubriquesFiltrees = rubriques.filter(r =>
+    r.nom.toLowerCase().includes(filtreRecherche.toLowerCase())
+  );
+
+  app.innerHTML = `
+    <div class="boite">
+      <div class="boite-titre">🔎 Rechercher une rubrique</div>
+      <div class="recherche-zone">
+        <input type="text" id="champ-recherche" placeholder="Tape le nom d'une rubrique..." value="${echapper(filtreRecherche)}">
+      </div>
+    </div>
+
+    <div class="boite">
+      <div class="boite-titre">📋 Liste des rubriques</div>
+      ${rubriquesFiltrees.length === 0
+        ? `<div class="aucun-resultat">Aucune rubrique ne correspond à "${echapper(filtreRecherche)}"</div>`
+        : `<table class="forum">
+            <tr><th>Rubrique</th><th style="width:60px;">Sujets</th></tr>
+            ${rubriquesFiltrees.map(r => `
+              <tr>
+                <td>
+                  <a href="#" data-rid="${r.id}" class="lien-rubrique">
+                    <span class="rubrique-nom" style="color:${r.couleur || '#000080'};">${echapper(r.nom)}</span>
+                  </a><br>
+                  <span class="rubrique-desc">${echapper(r.desc || "")}</span>
+                </td>
+                <td id="compte-${r.id}">...</td>
+              </tr>
+            `).join("")}
+          </table>`
+      }
+    </div>
+
+    <div class="boite">
+      <div class="boite-titre">➕ Créer une nouvelle rubrique</div>
+      <div class="champ-groupe">
+        <label>Nom de la rubrique</label>
+        <input type="text" id="nouv-rubrique-nom" maxlength="40" placeholder="Ex : Cuisine, Sport, Voyages...">
+      </div>
+      <div class="champ-groupe">
+        <label>Description (optionnel)</label>
+        <input type="text" id="nouv-rubrique-desc" maxlength="100" placeholder="Une phrase pour présenter le sujet">
+      </div>
+      <button id="btn-creer-rubrique">Créer la rubrique</button>
+    </div>
+  `;
+
+  document.getElementById("champ-recherche").addEventListener("input", (e) => {
+    filtreRecherche = e.target.value;
+    vueAccueil(app);
+  });
+  // remet le focus / curseur à la fin après re-rendu
+  const champRecherche = document.getElementById("champ-recherche");
+  champRecherche.focus();
+  champRecherche.setSelectionRange(champRecherche.value.length, champRecherche.value.length);
+
+  document.querySelectorAll(".lien-rubrique").forEach(el => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      etat.vue = "rubrique";
+      etat.rubriqueId = el.dataset.rid;
+      redessiner();
+    });
+  });
+
+  document.getElementById("btn-creer-rubrique").addEventListener("click", async () => {
+    const nomInput = document.getElementById("nouv-rubrique-nom");
+    const descInput = document.getElementById("nouv-rubrique-desc");
+    const nom = nomInput.value.trim();
+    if (!nom) { alert("Donne un nom à ta rubrique !"); return; }
+    if (rubriques.some(r => r.nom.toLowerCase() === nom.toLowerCase())) {
+      alert("Cette rubrique existe déjà !");
+      return;
+    }
+    const couleurs = ["#e74c3c","#8e44ad","#2980b9","#27ae60","#f39c12","#16a085","#c0392b","#2c3e50"];
+    try {
+      const nouvRef = await addDoc(rubriquesRef, {
+        nom: nom,
+        desc: descInput.value.trim(),
+        couleur: couleurs[Math.floor(Math.random()*couleurs.length)],
+        createdAt: serverTimestamp()
+      });
+      etat.vue = "rubrique";
+      etat.rubriqueId = nouvRef.id;
+      redessiner();
+    } catch (e) {
+      alert("Impossible de créer la rubrique. Réessaie dans un instant.");
+    }
+  });
+
+  // compte les messages de chaque rubrique visible
+  rubriquesFiltrees.forEach(async (r) => {
+    try {
+      const c = await getCountFromServer(query(messagesRef, where("rubriqueId", "==", r.id)));
+      const cell = document.getElementById("compte-" + r.id);
+      if (cell) cell.textContent = c.data().count;
+    } catch (e) { /* silencieux */ }
+  });
+}
+
+async function vueRubrique(app) {
+  const r = rubriques.find(x => x.id === etat.rubriqueId);
+  if (!r) { etat.vue = "accueil"; return redessiner(); }
+
+  app.innerHTML = `
+    <div class="fil-ariane"><a href="#" id="lien-accueil">🏠 Accueil</a> &raquo; <strong>${echapper(r.nom)}</strong></div>
+
+    <div class="boite">
+      <div class="boite-titre" style="background: linear-gradient(${r.couleur || '#0a246a'}, #a6caf0);">
+        💬 ${echapper(r.nom)}
+      </div>
+      <p class="rubrique-desc">${echapper(r.desc || "")}</p>
+    </div>
+
+    <div class="boite">
+      <div class="boite-titre">✏️ Nouveau message</div>
+      <div class="champ-groupe">
+        <label>Ton pseudo</label>
+        <input type="text" id="champ-pseudo" maxlength="25" placeholder="Anonyme" value="${echapper(pseudoMemoire)}">
+      </div>
+      <div class="champ-groupe">
+        <label>Ton message</label>
+        <textarea id="champ-texte" rows="4" maxlength="2000" placeholder="Écris ton message ici..."></textarea>
+      </div>
+      <div class="champ-groupe">
+        <label>Ajouter une photo (optionnel, max ~700 Ko)</label>
+        <input type="file" id="champ-photo" accept="image/*">
+        <img id="apercu-photo" class="apercu-photo">
+      </div>
+      <button id="btn-envoyer">Envoyer le message</button>
+      <span id="statut-envoi" style="margin-left:8px; font-size:11px;"></span>
+    </div>
+
+    <div class="boite">
+      <div class="boite-titre" id="titre-messages">📨 Messages</div>
+      <div id="liste-messages">Chargement des messages...</div>
+    </div>
+  `;
+
+  document.getElementById("lien-accueil").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (desinscrireMessages) { desinscrireMessages(); desinscrireMessages = null; }
+    etat.vue = "accueil";
+    redessiner();
+  });
+
+  const champPhoto = document.getElementById("champ-photo");
+  const apercu = document.getElementById("apercu-photo");
+  photoBase64Temp = null;
+
+  champPhoto.addEventListener("change", () => {
+    const fichier = champPhoto.files[0];
+    if (!fichier) { photoBase64Temp = null; apercu.style.display = "none"; return; }
+    redimensionnerImage(fichier, 600, 0.7).then(b64 => {
+      if (b64.length > 900000) {
+        alert("Cette photo est encore trop lourde après compression, essaie une autre image.");
+        champPhoto.value = "";
+        photoBase64Temp = null;
+        apercu.style.display = "none";
+        return;
+      }
+      photoBase64Temp = b64;
+      apercu.src = b64;
+      apercu.style.display = "block";
+    }).catch(() => alert("Impossible de lire cette image."));
+  });
+
+  document.getElementById("btn-envoyer").addEventListener("click", async () => {
+    const pseudoInput = document.getElementById("champ-pseudo");
+    const texteInput = document.getElementById("champ-texte");
+    const btn = document.getElementById("btn-envoyer");
+    const statut = document.getElementById("statut-envoi");
+    const texte = texteInput.value.trim();
+    if (!texte) { alert("Écris un message avant d'envoyer !"); return; }
+
+    pseudoMemoire = pseudoInput.value.trim() || "Anonyme";
+    btn.disabled = true;
+    statut.textContent = "Envoi...";
+
+    try {
+      await addDoc(messagesRef, {
+        rubriqueId: r.id,
+        pseudo: pseudoMemoire,
+        texte: texte,
+        photo: photoBase64Temp || null,
+        createdAt: serverTimestamp()
+      });
+      texteInput.value = "";
+      champPhoto.value = "";
+      photoBase64Temp = null;
+      apercu.style.display = "none";
+      statut.textContent = "Envoyé !";
+      setTimeout(() => { statut.textContent = ""; }, 2000);
+    } catch (e) {
+      statut.textContent = "Échec de l'envoi.";
+      alert("Le message n'a pas pu être envoyé. Vérifie ta connexion et réessaie.");
+    }
+    btn.disabled = false;
+  });
+
+  // écoute en direct les messages de cette rubrique
+  if (desinscrireMessages) desinscrireMessages();
+  const q = query(messagesRef, where("rubriqueId", "==", r.id), orderBy("createdAt", "desc"));
+  desinscrireMessages = onSnapshot(q, (snap) => {
+    const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const liste = document.getElementById("liste-messages");
+    const titre = document.getElementById("titre-messages");
+    if (!liste) return; // vue changée entre-temps
+    titre.textContent = `📨 ${msgs.length} message${msgs.length > 1 ? "s" : ""}`;
+    liste.innerHTML = msgs.length === 0
+      ? "<p>Aucun message pour l'instant. Sois le premier à écrire !</p>"
+      : msgs.map(m => `
+          <div class="message">
+            <div class="message-side">
+              <div class="message-pseudo">${echapper(m.pseudo || "Anonyme")}</div>
+            </div>
+            <div class="message-body">
+              <div class="message-date">${formatDate(m.createdAt)}</div>
+              <div class="message-texte">${echapper(m.texte)}</div>
+              ${m.photo ? `<img class="message-photo" src="${m.photo}">` : ""}
+            </div>
+          </div>
+        `).join("");
+  }, (err) => {
+    console.error(err);
+    const liste = document.getElementById("liste-messages");
+    if (liste) liste.innerHTML = "<p>⚠️ Impossible de charger les messages.</p>";
+  });
+}
+
+function redimensionnerImage(fichier, largeurMax, qualite) {
+  return new Promise((resolve, reject) => {
+    const lecteur = new FileReader();
+    lecteur.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > largeurMax) { h = Math.round(h * (largeurMax / w)); w = largeurMax; }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", qualite));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    lecteur.onerror = reject;
+    lecteur.readAsDataURL(fichier);
+  });
+}
+
+document.getElementById("compteur").textContent = String(Math.floor(Math.random()*900000)+100000).padStart(6,"0");
+
+(async () => {
+  await initFirebase();
+  ecouterRubriques(() => { if (etat.vue === "accueil") redessiner(); });
+  redessiner();
+})();
+</script>
+
+</body>
+</html>
