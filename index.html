@@ -300,7 +300,7 @@ async function vueAccueil(app) {
       ${rubriquesFiltrees.length === 0
         ? `<div class="aucun-resultat">Aucune rubrique ne correspond à "${echapper(filtreRecherche)}"</div>`
         : `<table class="forum">
-            <tr><th>Rubrique</th><th style="width:60px;">Sujets</th></tr>
+            <tr><th>Rubrique</th><th style="width:60px;">Sujets</th><th style="width:34px;"></th></tr>
             ${rubriquesFiltrees.map(r => `
               <tr>
                 <td>
@@ -310,6 +310,7 @@ async function vueAccueil(app) {
                   <span class="rubrique-desc">${echapper(r.desc || "")}</span>
                 </td>
                 <td id="compte-${r.id}">...</td>
+                <td>${r.authorId === monId ? `<button class="btn-supprimer-rubrique" data-id="${r.id}" data-nom="${echapper(r.nom)}" style="font-size:10px; padding:2px 6px; color:#a00;">🗑️</button>` : ""}</td>
               </tr>
             `).join("")}
           </table>`
@@ -348,6 +349,24 @@ async function vueAccueil(app) {
     });
   });
 
+  document.querySelectorAll(".btn-supprimer-rubrique").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const nomRubrique = btn.dataset.nom;
+      if (!confirm(`Supprimer la rubrique "${nomRubrique}" et tous ses messages ? Cette action est irréversible.`)) return;
+      btn.disabled = true;
+      try {
+        const rid = btn.dataset.id;
+        const snapMsgs = await getDocs(query(messagesRef, where("rubriqueId", "==", rid)));
+        await Promise.all(snapMsgs.docs.map(d => deleteDoc(d.ref)));
+        await deleteDoc(doc(db, "rubriques", rid));
+      } catch (e) {
+        alert("Impossible de supprimer cette rubrique.");
+        btn.disabled = false;
+      }
+    });
+  });
+
   document.getElementById("btn-creer-rubrique").addEventListener("click", async () => {
     const nomInput = document.getElementById("nouv-rubrique-nom");
     const descInput = document.getElementById("nouv-rubrique-desc");
@@ -363,6 +382,7 @@ async function vueAccueil(app) {
         nom: nom,
         desc: descInput.value.trim(),
         couleur: couleurs[Math.floor(Math.random()*couleurs.length)],
+        authorId: monId,
         createdAt: serverTimestamp()
       });
       etat.vue = "rubrique";
